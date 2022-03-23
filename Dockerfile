@@ -213,9 +213,6 @@ RUN echo $username:$userpasswd | chpasswd
 RUN chown -R $username /home/$username/.ssh
 RUN chown -R $username /home/$username/.local
 
-#RUN touch /home/$username/nbserver-1-open.html
-#RUN chown  $username /home/$username/nbserver-1-open.html
-
 ADD bin/entrypoint.sh /entrypoint.sh
 RUN sed -i s/%%username%%/$username/g /entrypoint.sh
 RUN chmod +x /entrypoint.sh
