@@ -1,6 +1,6 @@
-# devenv
+# dsenv
 
-Development/Research Operating Environment
+Data Science Environment
 
 # Prerequisites
 
@@ -27,7 +27,7 @@ Development/Research Operating Environment
 
 ```
 
- 2. Setup cert/key (self-signed)  for jupyter notebook (https support):
+ 2. Run setup. This also sets up cert/key (self-signed)  for jupyter notebook (https support):
 
 ```bash
 
