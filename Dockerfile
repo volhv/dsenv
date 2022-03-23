@@ -11,12 +11,12 @@ ARG userfullname
 ARG userid
 ARG grpid
 
-LABEL build-date="2021-03-23" \
+LABEL build-date="2021-03-24" \
       name="dsenv" \
       description="Data Science Basic Environment" \
       vcs-ref="" \
       vcs-url="" \
-      version="22.3.2"
+      version="22.3.3"
 
 
 ########################################################################
@@ -61,6 +61,9 @@ RUN chown -R $username /shared
 ####  Data Science Toolkit
 ########################################################################
 
+RUN echo $username
+RUN ls -l /home/
+
 ## data science libraries
 RUN apt-get update && apt-get install -y\
     software-properties-common\
@@ -85,7 +88,7 @@ RUN update-alternatives --config javac
 # user install
 USER $username
 
-# preinstall R packages
+# # preinstall R packages
 RUN R -e "install.packages('shiny')"
 RUN R -e "install.packages('rmarkdown')"
 RUN R -e "install.packages('plyr')"
@@ -104,7 +107,7 @@ RUN R -e "install.packages('data.table')"
 # install miniconda
 RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 RUN sh Miniconda3-latest-Linux-x86_64.sh -b
-ENV PATH /home/$username/miniconda3/bin:$PATH
+ENV PATH /home/${username}/miniconda3/bin:$PATH
 RUN sh /home/$username/miniconda3/bin/activate base
 
 # install jupyter lab
@@ -131,11 +134,11 @@ RUN echo "Installing R kernel"
 RUN R -e "install.packages('IRkernel')"
 RUN R -e "IRkernel::installspec()"
 
-# kernel support for Rust
+# # kernel support for Rust
 
-## -- uncomment for zmq support in rust:
-## sudo apt install libzmq3-dev
-## ENV R_INSTALL_OPTS "--no-default-features"
+# ## -- uncomment for zmq support in rust:
+# ## sudo apt install libzmq3-dev
+# ## ENV R_INSTALL_OPTS "--no-default-features"
 
 ENV R_INSTALL_OPTS ""
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.rs
@@ -170,33 +173,33 @@ RUN pip install -r /home/$username/dependencies/python.ext.txt
 RUN echo "Install NLTK models"
 RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
 
-## FLAIR
-# RUN echo "Install Flair models"
-# RUN python -c "from flair.embeddings import BertEmbeddings; BertEmbeddings('bert-base-cased')"
-# RUN python -c "from flair.models import SequenceTagger; SequenceTagger.load('ner')"
+# ## FLAIR
+# # RUN echo "Install Flair models"
+# # RUN python -c "from flair.embeddings import BertEmbeddings; BertEmbeddings('bert-base-cased')"
+# # RUN python -c "from flair.models import SequenceTagger; SequenceTagger.load('ner')"
 
-##
-## GENSIM
-##   Removed unused models:
-##     - fasttext-wiki-news-subwords-300
-##     - glove-twitter-200
-##
-#RUN echo "Install Gensim models"
-#RUN  python -c \
-# "import gensim.downloader as api;\
-#  api.load('glove-twitter-25',  True);"
+# ##
+# ## GENSIM
+# ##   Removed unused models:
+# ##     - fasttext-wiki-news-subwords-300
+# ##     - glove-twitter-200
+# ##
+# #RUN echo "Install Gensim models"
+# #RUN  python -c \
+# # "import gensim.downloader as api;\
+# #  api.load('glove-twitter-25',  True);"
 
 ## SPACY
 RUN echo "Install spaCy models"
 RUN python -m spacy download en_core_web_sm
 
 
-########################################################################
-####  SSH Keys SETUP
-####  Note that:
-####      - id_rsa should have permission flags=600
-####      - id_rsa_pub should have permission flags=644
-########################################################################
+# # ########################################################################
+# # ####  SSH Keys SETUP
+# # ####  Note that:
+# # ####      - id_rsa should have permission flags=600
+# # ####      - id_rsa_pub should have permission flags=644
+# # ########################################################################
 
 RUN echo "Adding GIT keys"
 
@@ -206,10 +209,17 @@ RUN git config --global user.email $usermail
 RUN git config --global user.name $userfullname
 
 USER root
-RUN echo "$username:$userpasswd" | chpasswd
+RUN echo $username:$userpasswd | chpasswd
 RUN chown -R $username /home/$username/.ssh
 RUN chown -R $username /home/$username/.local
 
+#RUN touch /home/$username/nbserver-1-open.html
+#RUN chown  $username /home/$username/nbserver-1-open.html
+
+ADD bin/entrypoint.sh /entrypoint.sh
+RUN sed -i s/%%username%%/$username/g /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+RUN chown $username /entrypoint.sh
 USER $username
 
 ########################################################################
@@ -228,8 +238,7 @@ ENV PATH /home/$username/miniconda3/bin:$PATH
 # setup pyspark-specific env
 ENV PYSPARK_DRIVER_PYTHON "python3.9"
 ENV PYSPARK_PYTHON "python3.9"
-RUN echo "export PATH=$PATH" >> "/home/$username/.bashrc"
+RUN echo "export PATH=$PATH" >> /home/$username/.bashrc
 
-ADD bin/entrypoint.sh /home/$username/entrypoint.sh
-ENTRYPOINT ["/home/$username/entrypoint.sh"]
+ENTRYPOINT [ "/entrypoint.sh" ]
 

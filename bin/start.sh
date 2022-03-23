@@ -15,8 +15,7 @@ fi
 docker run -p ${TARGET_PORT}:8888\
    -v $DEVENV_NOTEBOOKS_HOME:/shared/notebooks\
    -v $DEVENV_HOME/tmp/runtime/:/home/me/.local/share/jupyter/runtime/\
-   -v $DEVENV_HOME/tmp/secret.txt:/home/me/notebook_cookie_secret\
-   --user 1000:1000 $DOCKER_IMAGE
+   -v $DEVENV_HOME/tmp/secret.txt:/home/me/notebook_cookie_secret $DOCKER_IMAGE
 
 
 
