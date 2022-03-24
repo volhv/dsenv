@@ -3,6 +3,7 @@
 export DOCKER_IMAGE="ds:1.0.0"
 export TARGET_PORT="8888"
 
+export DEVENV_GPUS=1
 export DEVENV_HOME="/home/username"
 export DEVENV_NOTEBOOKS_HOME="/home/username/your/code"
 
