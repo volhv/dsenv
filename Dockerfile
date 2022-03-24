@@ -151,9 +151,6 @@ ENV PATH /home/$username/.cargo/bin/:$PATH
 RUN cargo install evcxr_jupyter
 RUN evcxr_jupyter --install
 
-## Map runtime folder for jupyter
-ADD ./tmp/runtime /home/$username/.local/share/jupyter/runtime/
-
 ##
 ## Install Extended dependencies
 ##
@@ -165,6 +162,10 @@ RUN pip install -r /home/$username/dependencies/python.core.txt
 
 ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
 RUN pip install -r /home/$username/dependencies/python.ext.txt
+
+RUN pip install torch==1.10.0+cu111\
+          torchvision==0.11.0+cu111\
+          torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 #
 # Download pre-trained models parameters
@@ -202,6 +203,9 @@ RUN python -m spacy download en_core_web_sm
 # # ########################################################################
 
 RUN echo "Adding GIT keys"
+
+## Map runtime folder for jupyter
+ADD ./tmp/runtime /home/$username/.local/share/jupyter/runtime/
 
 ADD ./keys/id_rsa_git.pub /home/$username/.ssh/id_rsa.pub
 ADD ./keys/id_rsa_git /home/$username/.ssh/id_rsa
