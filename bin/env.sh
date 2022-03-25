@@ -13,4 +13,3 @@ export DEVENV_USERGID=<user_gid>
 export DEVENV_PWD=<password>
 export DEVENV_USERMAIL="email@example.com"
 export DEVENV_USERFULL="User Full Name"
-
