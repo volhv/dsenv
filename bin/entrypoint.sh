@@ -3,7 +3,7 @@ set -e
 
 echo "PATH=$PATH"
 
-export JUPYTER_RUNTIME_DIR="/home/%%username%%/"
+export JUPYTER_RUNTIME_DIR="/home/%%username%%/.local/share/jupyter/runtime/"
 
 # drop access to myuser and run cmd
 exec jupyter lab --ip=0.0.0.0 --port=8888\
