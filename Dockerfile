@@ -11,12 +11,12 @@ ARG userfullname
 ARG userid
 ARG grpid
 
-LABEL build-date="2021-03-24" \
+LABEL build-date="2023-01-01" \
       name="dsenv" \
       description="Data Science Basic Environment" \
       vcs-ref="" \
       vcs-url="" \
-      version="22.3.3"
+      version="23.1.1"
 
 
 ########################################################################
@@ -81,9 +81,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     pandoc \
     texlive-xetex
 
-RUN apt-get install -y openjdk-11-jdk
+RUN apt-get update && apt-get install -y openjdk-11-jre openjdk-11-jdk
 RUN update-alternatives --config java
 RUN update-alternatives --config javac
+
+# install postgresql
+RUN apt-get install -y postgresql postgresql-contrib
 
 # user install
 USER $username
@@ -106,16 +109,15 @@ RUN R -e "install.packages('data.table')"
 
 # install miniconda
 RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN sh Miniconda3-latest-Linux-x86_64.sh -b
+RUN bash Miniconda3-latest-Linux-x86_64.sh -b
 ENV PATH /home/${username}/miniconda3/bin:$PATH
-RUN sh /home/$username/miniconda3/bin/activate base
+RUN bash /home/$username/miniconda3/bin/activate base
 
 # install jupyter lab
-RUN conda install -c conda-forge nodejs==14.17.4
-RUN conda install -c conda-forge ipywidgets==7.6.3
-RUN conda install -c conda-forge jupyterlab-git==0.33.0
-RUN conda install -c conda-forge jupyterlab==3.3.2
-RUN conda install -c conda-forge xeus-python==0.13.4
+RUN conda install -c conda-forge nodejs==18.12.1
+RUN conda install -c conda-forge ipywidgets==8.0.2
+RUN conda install -c conda-forge jupyterlab
+RUN conda install -c conda-forge xeus-python==0.15.1
 RUN jupyter labextension install @jupyterlab/debugger
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
@@ -163,9 +165,9 @@ RUN pip install -r /home/$username/dependencies/python.core.txt
 ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
 RUN pip install -r /home/$username/dependencies/python.ext.txt
 
-RUN pip install torch==1.10.0+cu111\
-          torchvision==0.11.0+cu111\
-          torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install torchaudio==0.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
 
 #
 # Download pre-trained models parameters
@@ -194,6 +196,9 @@ RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); 
 RUN echo "Install spaCy models"
 RUN python -m spacy download en_core_web_sm
 
+## Extra Dependencies / Experimentals
+RUN pip install faker==15.3.*
+RUN pip install transformers==4.25.*
 
 # # ########################################################################
 # # ####  SSH Keys SETUP
@@ -213,6 +218,18 @@ RUN git config --global user.email $usermail
 RUN git config --global user.name $userfullname
 
 USER root
+RUN curl -OL https://golang.org/dl/go1.19.4.linux-amd64.tar.gz
+RUN tar -C /usr/local -xvf go1.19.4.linux-amd64.tar.gz
+
+USER $username
+ENV PATH "$PATH:/usr/local/go/bin"
+ENV GO111MODULE "on"
+RUN go install github.com/gopherdata/gophernotes@v0.7.5
+RUN mkdir -p /home/$username/.local/share/jupyter/kernels/gophernotes
+RUN cd /home/$username/.local/share/jupyter/kernels/gophernotes && cp "$(go env GOPATH)"/pkg/mod/github.com/gopherdata/gophernotes@v0.7.5/kernel/*  "." && chmod +w ./kernel.json  && sed "s|gophernotes|$(go env GOPATH)/bin/gophernotes|" < kernel.json.in > kernel.json
+
+USER root
+
 RUN echo $username:$userpasswd | chpasswd
 RUN chown -R $username /home/$username/.ssh
 RUN chown -R $username /home/$username/.local
