@@ -114,6 +114,7 @@ ENV PATH /home/${username}/miniconda3/bin:$PATH
 RUN bash /home/$username/miniconda3/bin/activate base
 
 # install jupyter lab
+RUN conda install python=3.9
 RUN conda install -c conda-forge nodejs==18.12.1
 RUN conda install -c conda-forge ipywidgets==8.0.2
 RUN conda install -c conda-forge jupyterlab
