@@ -194,8 +194,8 @@ RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); 
 # #  api.load('glove-twitter-25',  True);"
 
 ## SPACY
-RUN echo "Install spaCy models"
-RUN python -m spacy download en_core_web_sm
+#RUN echo "Install spaCy models"
+#RUN python -m spacy download en_core_web_sm
 
 ## Extra Dependencies / Experimentals
 RUN pip install faker==15.3.*
