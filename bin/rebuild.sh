@@ -12,7 +12,6 @@ echo "Build docker image"
 echo "Using credentials: userid=$DEVENV_USERID, grpid=$DEVENV_USERGID for $DEVENV_USER"
 
 cd $DEVENV_HOME && docker build -t ${DOCKER_IMAGE}\
-  --platform linux/x86_64\
   --build-arg username="$DEVENV_USER"\
   --build-arg userpasswd="$DEVENV_PWD"\
   --build-arg usermail="$DEVENV_USERMAIL"\

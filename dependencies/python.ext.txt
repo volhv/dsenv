@@ -1,5 +1,8 @@
-tensorflow-gpu==2.11.0
-spacy==3.2.*
+torch
+torchvision
+torchaudio
+tensorflow
+spacy
 psutil==5.9.4
 kaggle==1.5.12
 

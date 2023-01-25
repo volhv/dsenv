@@ -108,8 +108,8 @@ RUN R -e "install.packages('tools')"
 RUN R -e "install.packages('data.table')"
 
 # install miniconda
-RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN bash Miniconda3-latest-Linux-x86_64.sh -b
+RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+RUN bash Miniconda3-latest-Linux-aarch64.sh -b
 ENV PATH /home/${username}/miniconda3/bin:$PATH
 RUN bash /home/$username/miniconda3/bin/activate base
 
@@ -124,13 +124,6 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 RUN jupyter lab clean
 RUN jupyter lab build
-
-# python 2 ipython kernel
-RUN conda init bash
-RUN conda create -n py2 python=2
-RUN sh /home/$username/miniconda3/bin/activate py2
-RUN python -m ipykernel install --user
-RUN sh /home/$username/miniconda3/bin/activate base
 
 # kernel support for R
 RUN echo "Installing R kernel"
@@ -166,9 +159,9 @@ RUN pip install -r /home/$username/dependencies/python.core.txt
 ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
 RUN pip install -r /home/$username/dependencies/python.ext.txt
 
-RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchaudio==0.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+#RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+#RUN pip install torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+#RUN pip install torchaudio==0.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
 
 #
 # Download pre-trained models parameters
@@ -219,8 +212,8 @@ RUN git config --global user.email $usermail
 RUN git config --global user.name $userfullname
 
 USER root
-RUN curl -OL https://golang.org/dl/go1.19.4.linux-amd64.tar.gz
-RUN tar -C /usr/local -xvf go1.19.4.linux-amd64.tar.gz
+RUN curl -OL https://golang.org/dl/go1.19.5.linux-arm64.tar.gz
+RUN tar -C /usr/local -xvf go1.19.5.linux-arm64.tar.gz
 
 USER $username
 ENV PATH "$PATH:/usr/local/go/bin"
