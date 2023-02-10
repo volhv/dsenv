@@ -125,13 +125,6 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 RUN jupyter lab clean
 RUN jupyter lab build
 
-# python 2 ipython kernel
-RUN conda init bash
-RUN conda create -n py2 python=2
-RUN sh /home/$username/miniconda3/bin/activate py2
-RUN python -m ipykernel install --user
-RUN sh /home/$username/miniconda3/bin/activate base
-
 # kernel support for R
 RUN echo "Installing R kernel"
 RUN R -e "install.packages('IRkernel')"
@@ -157,49 +150,13 @@ RUN evcxr_jupyter --install
 ##
 ## Install Extended dependencies
 ##
-RUN pip install --upgrade pip
+RUN pip install --no-cache-dir  --upgrade pip
 RUN mkdir /home/$username/dependencies/
 
 ADD ./dependencies/python.core.txt /home/$username/dependencies/python.core.txt
-RUN pip install -r /home/$username/dependencies/python.core.txt
+RUN pip install --no-cache-dir -r /home/$username/dependencies/python.core.txt
 
-ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
-RUN pip install -r /home/$username/dependencies/python.ext.txt
-
-RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchaudio==0.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-
-#
-# Download pre-trained models parameters
-#
-# NLTK
-RUN echo "Install NLTK models"
-RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
-
-# ## FLAIR
-# # RUN echo "Install Flair models"
-# # RUN python -c "from flair.embeddings import BertEmbeddings; BertEmbeddings('bert-base-cased')"
-# # RUN python -c "from flair.models import SequenceTagger; SequenceTagger.load('ner')"
-
-# ##
-# ## GENSIM
-# ##   Removed unused models:
-# ##     - fasttext-wiki-news-subwords-300
-# ##     - glove-twitter-200
-# ##
-# #RUN echo "Install Gensim models"
-# #RUN  python -c \
-# # "import gensim.downloader as api;\
-# #  api.load('glove-twitter-25',  True);"
-
-## SPACY
-RUN echo "Install spaCy models"
 RUN python -m spacy download en_core_web_sm
-
-## Extra Dependencies / Experimentals
-RUN pip install faker==15.3.*
-RUN pip install transformers==4.25.*
 
 # # ########################################################################
 # # ####  SSH Keys SETUP
@@ -212,7 +169,6 @@ RUN echo "Adding GIT keys"
 
 ## Map runtime folder for jupyter
 ADD ./tmp/runtime /home/$username/.local/share/jupyter/runtime/
-
 ADD ./keys/id_rsa_git.pub /home/$username/.ssh/id_rsa.pub
 ADD ./keys/id_rsa_git /home/$username/.ssh/id_rsa
 RUN git config --global user.email $usermail
@@ -251,6 +207,9 @@ USER $username
 ##     ENV OMP_NUM_THREADS 12
 ########################################################################
 
+ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
+RUN pip install --no-cache-dir  -r /home/$username/dependencies/python.ext.txt
+
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 ENV PATH /home/$username/miniconda3/bin:$PATH
 
@@ -258,6 +217,7 @@ ENV PATH /home/$username/miniconda3/bin:$PATH
 ENV PYSPARK_DRIVER_PYTHON "python3.9"
 ENV PYSPARK_PYTHON "python3.9"
 RUN echo "export PATH=$PATH" >> /home/$username/.bashrc
+
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
