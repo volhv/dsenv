@@ -1,1 +1,4 @@
 accelerate==0.16.*
+polars==0.16.3
+# jupyter extensions
+jupyter-resource-usage==0.7.1
