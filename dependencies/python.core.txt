@@ -4,6 +4,8 @@ torchvision==0.14.1+cu117
 torchaudio==0.13.1+cu117
 pytorch-lightning==1.9.1
 tensorflow-gpu==2.11.0
+accelerate==0.16.*
+diffusers==0.12.1
 Cython==0.29.*
 numpy==1.23.5
 pandas==1.5.3
@@ -35,9 +37,13 @@ ydata-profiling==4.0.0
 category_encoders==2.6.0
 spacy==3.5.*
 transformers==4.25.*
+polars==0.16.3
 
 #visualisation
 bokeh==3.0.3
 seaborn==0.12.2
 matplotlib==3.6.2
 networkx==3.0.*
+
+# jupyter extensions
+jupyter-resource-usage==0.7.1

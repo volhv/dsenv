@@ -147,6 +147,20 @@ ENV PATH /home/$username/.cargo/bin/:$PATH
 RUN cargo install evcxr_jupyter
 RUN evcxr_jupyter --install
 
+#
+# GO kernel
+RUN curl -OL https://golang.org/dl/go1.19.4.linux-amd64.tar.gz
+USER root
+RUN tar -C /usr/local -xvf go1.19.4.linux-amd64.tar.gz
+
+USER $username
+ENV PATH "$PATH:/usr/local/go/bin"
+ENV GO111MODULE "on"
+RUN go install github.com/gopherdata/gophernotes@v0.7.5
+RUN mkdir -p /home/$username/.local/share/jupyter/kernels/gophernotes
+RUN cd /home/$username/.local/share/jupyter/kernels/gophernotes && cp "$(go env GOPATH)"/pkg/mod/github.com/gopherdata/gophernotes@v0.7.5/kernel/*  "." && chmod +w ./kernel.json  && sed "s|gophernotes|$(go env GOPATH)/bin/gophernotes|" < kernel.json.in > kernel.json
+
+
 ##
 ## Install Extended dependencies
 ##
@@ -174,16 +188,6 @@ ADD ./keys/id_rsa_git /home/$username/.ssh/id_rsa
 RUN git config --global user.email $usermail
 RUN git config --global user.name $userfullname
 
-USER root
-RUN curl -OL https://golang.org/dl/go1.19.4.linux-amd64.tar.gz
-RUN tar -C /usr/local -xvf go1.19.4.linux-amd64.tar.gz
-
-USER $username
-ENV PATH "$PATH:/usr/local/go/bin"
-ENV GO111MODULE "on"
-RUN go install github.com/gopherdata/gophernotes@v0.7.5
-RUN mkdir -p /home/$username/.local/share/jupyter/kernels/gophernotes
-RUN cd /home/$username/.local/share/jupyter/kernels/gophernotes && cp "$(go env GOPATH)"/pkg/mod/github.com/gopherdata/gophernotes@v0.7.5/kernel/*  "." && chmod +w ./kernel.json  && sed "s|gophernotes|$(go env GOPATH)/bin/gophernotes|" < kernel.json.in > kernel.json
 
 USER root
 
@@ -216,6 +220,7 @@ ENV PATH /home/$username/miniconda3/bin:$PATH
 # setup pyspark-specific env
 ENV PYSPARK_DRIVER_PYTHON "python3.9"
 ENV PYSPARK_PYTHON "python3.9"
+# ENV HF_HOME "/shared/notebooks/db/dl_models"
 RUN echo "export PATH=$PATH" >> /home/$username/.bashrc
 
 
