@@ -147,52 +147,30 @@ ENV PATH /home/$username/.cargo/bin/:$PATH
 RUN cargo install evcxr_jupyter
 RUN evcxr_jupyter --install
 
+#
+# GO kernel
+RUN curl -OL https://golang.org/dl/go1.19.4.linux-arm64.tar.gz
+USER root
+RUN tar -C /usr/local -xvf go1.19.4.linux-arm64.tar.gz
+
+USER $username
+ENV PATH "$PATH:/usr/local/go/bin"
+ENV GO111MODULE "on"
+RUN go install github.com/gopherdata/gophernotes@v0.7.5
+RUN mkdir -p /home/$username/.local/share/jupyter/kernels/gophernotes
+RUN cd /home/$username/.local/share/jupyter/kernels/gophernotes && cp "$(go env GOPATH)"/pkg/mod/github.com/gopherdata/gophernotes@v0.7.5/kernel/*  "." && chmod +w ./kernel.json  && sed "s|gophernotes|$(go env GOPATH)/bin/gophernotes|" < kernel.json.in > kernel.json
+
+
 ##
 ## Install Extended dependencies
 ##
-RUN pip install --upgrade pip
+RUN pip install --no-cache-dir  --upgrade pip
 RUN mkdir /home/$username/dependencies/
 
 ADD ./dependencies/python.core.txt /home/$username/dependencies/python.core.txt
-RUN pip install -r /home/$username/dependencies/python.core.txt
+RUN pip install --no-cache-dir -r /home/$username/dependencies/python.core.txt
 
-ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
-RUN pip install -r /home/$username/dependencies/python.ext.txt
-
-#RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-#RUN pip install torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-#RUN pip install torchaudio==0.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-
-#
-# Download pre-trained models parameters
-#
-# NLTK
-RUN echo "Install NLTK models"
-RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
-
-# ## FLAIR
-# # RUN echo "Install Flair models"
-# # RUN python -c "from flair.embeddings import BertEmbeddings; BertEmbeddings('bert-base-cased')"
-# # RUN python -c "from flair.models import SequenceTagger; SequenceTagger.load('ner')"
-
-# ##
-# ## GENSIM
-# ##   Removed unused models:
-# ##     - fasttext-wiki-news-subwords-300
-# ##     - glove-twitter-200
-# ##
-# #RUN echo "Install Gensim models"
-# #RUN  python -c \
-# # "import gensim.downloader as api;\
-# #  api.load('glove-twitter-25',  True);"
-
-## SPACY
-RUN echo "Install spaCy models"
 RUN python -m spacy download en_core_web_sm
-
-## Extra Dependencies / Experimentals
-RUN pip install faker==15.3.*
-RUN pip install transformers==4.25.*
 
 # # ########################################################################
 # # ####  SSH Keys SETUP
@@ -205,22 +183,11 @@ RUN echo "Adding GIT keys"
 
 ## Map runtime folder for jupyter
 ADD ./tmp/runtime /home/$username/.local/share/jupyter/runtime/
-
 ADD ./keys/id_rsa_git.pub /home/$username/.ssh/id_rsa.pub
 ADD ./keys/id_rsa_git /home/$username/.ssh/id_rsa
 RUN git config --global user.email $usermail
 RUN git config --global user.name $userfullname
 
-USER root
-RUN curl -OL https://golang.org/dl/go1.19.5.linux-arm64.tar.gz
-RUN tar -C /usr/local -xvf go1.19.5.linux-arm64.tar.gz
-
-USER $username
-ENV PATH "$PATH:/usr/local/go/bin"
-ENV GO111MODULE "on"
-RUN go install github.com/gopherdata/gophernotes@v0.7.5
-RUN mkdir -p /home/$username/.local/share/jupyter/kernels/gophernotes
-RUN cd /home/$username/.local/share/jupyter/kernels/gophernotes && cp "$(go env GOPATH)"/pkg/mod/github.com/gopherdata/gophernotes@v0.7.5/kernel/*  "." && chmod +w ./kernel.json  && sed "s|gophernotes|$(go env GOPATH)/bin/gophernotes|" < kernel.json.in > kernel.json
 
 USER root
 
@@ -244,13 +211,17 @@ USER $username
 ##     ENV OMP_NUM_THREADS 12
 ########################################################################
 
+ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
+RUN pip install --no-cache-dir  -r /home/$username/dependencies/python.ext.txt
+
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 ENV PATH /home/$username/miniconda3/bin:$PATH
 
 # setup pyspark-specific env
 ENV PYSPARK_DRIVER_PYTHON "python3.9"
 ENV PYSPARK_PYTHON "python3.9"
+# ENV HF_HOME "/shared/notebooks/db/dl_models"
 RUN echo "export PATH=$PATH" >> /home/$username/.bashrc
 
-ENTRYPOINT [ "/entrypoint.sh" ]
 
+ENTRYPOINT [ "/entrypoint.sh" ]
