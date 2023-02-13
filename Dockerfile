@@ -211,6 +211,8 @@ USER $username
 ##     ENV OMP_NUM_THREADS 12
 ########################################################################
 
+RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
+
 ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
 RUN pip install --no-cache-dir  -r /home/$username/dependencies/python.ext.txt
 
