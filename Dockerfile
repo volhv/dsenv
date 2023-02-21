@@ -117,7 +117,7 @@ RUN bash /home/$username/miniconda3/bin/activate base
 RUN conda install python=3.9
 RUN conda install -c conda-forge nodejs==18.12.1
 RUN conda install -c conda-forge ipywidgets==8.0.2
-RUN conda install -c conda-forge jupyterlab
+RUN conda install -c conda-forge jupyterlab==3.6.1
 RUN conda install -c conda-forge xeus-python==0.15.1
 RUN jupyter labextension install @jupyterlab/debugger
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
@@ -169,7 +169,6 @@ RUN mkdir /home/$username/dependencies/
 
 ADD ./dependencies/python.core.txt /home/$username/dependencies/python.core.txt
 RUN pip install --no-cache-dir -r /home/$username/dependencies/python.core.txt
-
 RUN python -m spacy download en_core_web_sm
 
 # # ########################################################################
