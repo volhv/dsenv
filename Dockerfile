@@ -117,7 +117,7 @@ RUN bash /home/$username/miniconda3/bin/activate base
 RUN conda install python=3.9
 RUN conda install -c conda-forge nodejs==18.12.1
 RUN conda install -c conda-forge ipywidgets==8.0.2
-RUN conda install -c conda-forge jupyterlab
+RUN conda install -c conda-forge jupyterlab==3.6.1
 RUN conda install -c conda-forge xeus-python==0.15.1
 RUN jupyter labextension install @jupyterlab/debugger
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
