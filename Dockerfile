@@ -170,6 +170,7 @@ RUN mkdir /home/$username/dependencies/
 ADD ./dependencies/python.core.txt /home/$username/dependencies/python.core.txt
 RUN pip install --no-cache-dir -r /home/$username/dependencies/python.core.txt
 
+RUN pip install -U spacy==3.5.*
 RUN python -m spacy download en_core_web_sm
 
 # # ########################################################################
