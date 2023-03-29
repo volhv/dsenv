@@ -190,7 +190,7 @@ RUN git config --global user.name $userfullname
 
 
 USER root
-
+RUN usermod -a -G sudo $username 
 RUN echo $username:$userpasswd | chpasswd
 RUN chown -R $username /home/$username/.ssh
 RUN chown -R $username /home/$username/.local
@@ -224,6 +224,6 @@ ENV PYSPARK_DRIVER_PYTHON "python3.9"
 ENV PYSPARK_PYTHON "python3.9"
 # ENV HF_HOME "/shared/notebooks/db/dl_models"
 RUN echo "export PATH=$PATH" >> /home/$username/.bashrc
-
+RUN conda init bash
 
 ENTRYPOINT [ "/entrypoint.sh" ]
