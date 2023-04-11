@@ -11,12 +11,12 @@ ARG userfullname
 ARG userid
 ARG grpid
 
-LABEL build-date="2023-01-01" \
+LABEL build-date="2023-04-10" \
       name="dsenv" \
       description="Data Science Basic Environment" \
       vcs-ref="" \
       vcs-url="" \
-      version="23.1.1"
+      version="23.4.1"
 
 
 ########################################################################
@@ -38,14 +38,18 @@ ENV LANG en_US.utf8
 RUN apt-get update && apt-get install -y \
   gnupg \
   curl  \
-  git   \
-  ffmpeg\
-  vim   \
-  cmake \
   sudo  \
+  vim   \
+  git   \
+  cmake
+
+RUN apt-get install -y \
+  ffmpeg\
+  flac
+
+RUN apt-get install -y \
   build-essential\
   openjdk-11-jre-headless
-
 
 ########################################################################
 #### Setup Default User
@@ -107,17 +111,19 @@ RUN R -e "install.packages('R.utils')"
 RUN R -e "install.packages('tools')"
 RUN R -e "install.packages('data.table')"
 
-# install miniconda
-RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
-RUN bash Miniconda3-latest-Linux-aarch64.sh -b
+## install miniconda
+#RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+ENV CONDA_INSTALLER Miniconda3-py39_22.11.1-1-Linux-aarch64.sh
+RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/${CONDA_INSTALLER}
+RUN bash ${CONDA_INSTALLER} -b
 ENV PATH /home/${username}/miniconda3/bin:$PATH
 RUN bash /home/$username/miniconda3/bin/activate base
 
 # install jupyter lab
 RUN conda install python=3.9
-RUN conda install -c conda-forge nodejs==18.12.1
-RUN conda install -c conda-forge ipywidgets==8.0.2
-RUN conda install -c conda-forge jupyterlab==3.6.1
+RUN conda install -c conda-forge nodejs==18.15.0
+RUN conda install -c conda-forge ipywidgets==8.0.5
+RUN conda install -c conda-forge jupyterlab==3.6.3
 RUN conda install -c conda-forge xeus-python==0.15.1
 RUN jupyter labextension install @jupyterlab/debugger
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager

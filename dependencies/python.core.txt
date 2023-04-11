@@ -25,6 +25,7 @@ PyYAML==6.0
 faker==15.3.*
 psutil==5.9.4
 kaggle==1.5.12
+gensim==4.3.1
 
 # boostings
 lightgbm==3.3.2
