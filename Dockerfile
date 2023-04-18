@@ -222,7 +222,7 @@ RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
 RUN pip install --no-cache-dir  -r /home/$username/dependencies/python.ext.txt
 
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-arm64/
 ENV PATH /home/$username/miniconda3/bin:$PATH
 
 # setup pyspark-specific env
