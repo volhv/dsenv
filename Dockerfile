@@ -11,12 +11,12 @@ ARG userfullname
 ARG userid
 ARG grpid
 
-LABEL build-date="2023-01-01" \
+LABEL build-date="2023-10-01" \
       name="dsenv" \
       description="Data Science Basic Environment" \
       vcs-ref="" \
       vcs-url="" \
-      version="23.1.1"
+      version="23.10.1"
 
 
 ########################################################################
