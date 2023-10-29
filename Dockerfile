@@ -11,12 +11,12 @@ ARG userfullname
 ARG userid
 ARG grpid
 
-LABEL build-date="2023-10-01" \
+LABEL build-date="2023-10-28" \
       name="dsenv" \
       description="Data Science Basic Environment" \
       vcs-ref="" \
       vcs-url="" \
-      version="23.10.1"
+      version="23.10.28"
 
 
 ########################################################################
@@ -43,8 +43,7 @@ RUN apt-get update && apt-get install -y \
   vim   \
   cmake \
   sudo  \
-  build-essential\
-  openjdk-11-jre-headless
+  build-essential
 
 
 ########################################################################
@@ -81,7 +80,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     pandoc \
     texlive-xetex
 
-RUN apt-get update && apt-get install -y openjdk-11-jre openjdk-11-jdk
+RUN apt-get update && apt-get install -y openjdk-17-jre openjdk-17-jdk
 RUN update-alternatives --config java
 RUN update-alternatives --config javac
 
@@ -166,9 +165,9 @@ RUN pip install -r /home/$username/dependencies/python.core.txt
 ADD ./dependencies/python.ext.txt /home/$username/dependencies/python.ext.txt
 RUN pip install -r /home/$username/dependencies/python.ext.txt
 
-RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchaudio==0.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install torch==2.1.0+cu118 -f https://download.pytorch.org/whl/torch_stable.html
+#RUN pip install torchvision==0.16.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+#RUN pip install torchaudio==0.15.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
 
 #
 # Download pre-trained models parameters
