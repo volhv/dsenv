@@ -1,10 +1,10 @@
 #!/bin/bash
 
-export DOCKER_IMAGE="ds:1.0.0"
+export DOCKER_IMAGE="ds:1.0.1"
 export TARGET_PORT="8888"
 
 export DEVENV_GPUS=0
-export DEVENV_HOME="/home/username"
+export DEVENV_HOME="/home/username/tools/dsenv/"
 export DEVENV_NOTEBOOKS_HOME="/home/username/your/code"
 
 export DEVENV_USER="$USER"
