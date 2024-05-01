@@ -11,13 +11,12 @@ ARG userfullname
 ARG userid
 ARG grpid
 
-LABEL build-date="2023-10-01" \
+LABEL build-date="2024-04-27" \
       name="dsenv" \
       description="Data Science Basic Environment" \
       vcs-ref="" \
       vcs-url="" \
-      version="23.10.1"
-
+      version="24.4.1"
 
 ########################################################################
 ####  Define External Data Volumes
@@ -38,13 +37,22 @@ ENV LANG en_US.utf8
 RUN apt-get update && apt-get install -y \
   gnupg \
   curl  \
-  git   \
-  ffmpeg\
-  vim   \
-  cmake \
   sudo  \
+  vim   \
+  git   \
+  cmake
+
+RUN apt-get install -y \
+  ffmpeg\
+  flac
+
+RUN apt-get update && apt-get install -y \
   build-essential\
-  openjdk-11-jre-headless
+  openjdk-17-jre\
+  openjdk-17-jdk
+
+RUN update-alternatives --config java
+RUN update-alternatives --config javac
 
 
 ########################################################################
@@ -81,9 +89,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     pandoc \
     texlive-xetex
 
-RUN apt-get update && apt-get install -y openjdk-11-jre openjdk-11-jdk
-RUN update-alternatives --config java
-RUN update-alternatives --config javac
+
 
 # install postgresql
 RUN apt-get install -y postgresql postgresql-contrib
@@ -107,18 +113,20 @@ RUN R -e "install.packages('R.utils')"
 RUN R -e "install.packages('tools')"
 RUN R -e "install.packages('data.table')"
 
-# install miniconda
-RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN bash Miniconda3-latest-Linux-x86_64.sh -b
+## install miniconda
+#RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+ENV CONDA_INSTALLER Miniconda3-py39_24.3.0-0-Linux-x86_64.sh
+RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/${CONDA_INSTALLER}
+RUN bash ${CONDA_INSTALLER} -b
 ENV PATH /home/${username}/miniconda3/bin:$PATH
 RUN bash /home/$username/miniconda3/bin/activate base
 
+
 # install jupyter lab
 RUN conda install python=3.9
-RUN conda install -c conda-forge nodejs==18.12.1
-RUN conda install -c conda-forge ipywidgets==8.0.2
-RUN conda install -c conda-forge jupyterlab
-RUN conda install -c conda-forge xeus-python==0.15.1
+RUN conda install -c conda-forge nodejs==20.12.2
+RUN conda install -c conda-forge ipywidgets==8.1.2
+RUN conda install -c conda-forge jupyterlab==4.1.7
 RUN jupyter labextension install @jupyterlab/debugger
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
@@ -258,6 +266,11 @@ ENV PATH /home/$username/miniconda3/bin:$PATH
 ENV PYSPARK_DRIVER_PYTHON "python3.9"
 ENV PYSPARK_PYTHON "python3.9"
 RUN echo "export PATH=$PATH" >> /home/$username/.bashrc
+
+
+RUN python -m spacy download en_core_web_sm
+RUN python -m spacy download ru_core_news_sm
+RUN python -m spacy download ru_core_news_lg
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
