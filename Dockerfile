@@ -119,8 +119,8 @@ RUN conda install -c conda-forge nodejs==18.12.1
 RUN conda install -c conda-forge ipywidgets==8.0.2
 RUN conda install -c conda-forge jupyterlab==3.6.1
 RUN conda install -c conda-forge xeus-python==0.15.1
-RUN jupyter labextension install @jupyterlab/debugger
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+#RUN jupyter labextension install @jupyterlab/debugger
+#RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 RUN jupyter lab clean
 RUN jupyter lab build
@@ -198,7 +198,23 @@ ADD bin/entrypoint.sh /entrypoint.sh
 RUN sed -i s/%%username%%/$username/g /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 RUN chown $username /entrypoint.sh
+
+RUN apt install -y python3-dev libpq-dev
+
+#RUN add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
+RUN apt update && apt install -y gdal-bin
+RUN apt update && apt install -y libgdal-dev python3-gdal
+
 USER $username
+
+#ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+#ENV C_INCLUDE_PATH=/usr/include/gdal
+
+#RUN pip install --global-option=build_ext --global-option="-I/usr/include/gdal" GDAL==`gdal-config --version`
+#RUN pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
+#RUN pip install -U sqlalchemy psycopg2
+
+RUN python -m pip install -qU pyogrio osmnx psycopg2-binary geoalchemy2 'sqlalchemy<2.0' 2> /dev/null
 
 ########################################################################
 ##  Paths & Environment
