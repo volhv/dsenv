@@ -19,3 +19,4 @@ cd $DEVENV_HOME && docker build -t ${DOCKER_IMAGE}\
   --build-arg userfullname="$DEVENV_USERFULL"\
   --build-arg userid=$DEVENV_USERID --build-arg grpid=$DEVENV_USERGID .
 
+

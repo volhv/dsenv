@@ -12,11 +12,17 @@ if [[ -z "$DEVENV_HOME" ]]; then
   exit 1
 fi
 
-mkdir -p $DEVENV_HOME/tmp/cache/
+export CACHE_DIR=$DEVENV_HOME/tmp/cache/
+
+
+mkdir -p $CACHE_DIR\
+  && chown -R $DEVENV_USERID:$DEVENV_USERGID $CACHE_DIR
 
 docker run --gpus ${DEVENV_GPUS} -p ${TARGET_PORT}:8888\
+   -p 8080:8080\
+   -p 8088:8088\
    -v $DEVENV_NOTEBOOKS_HOME:/shared/notebooks\
-   -v $DEVENV_HOME/tmp/cache/:/home/$DEVENV_USER/.cache/\
+   -v $CACHE_DIR:/home/$DEVENV_USER/.cache/\
    -v $DEVENV_HOME/tmp/runtime/:/home/$DEVENV_USER/.local/share/jupyter/runtime/\
    -v $DEVENV_HOME/tmp/notebook_cookie_secret:/home/$DEVENV_USER/notebook_cookie_secret $DOCKER_IMAGE
 

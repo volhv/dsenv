@@ -11,12 +11,12 @@ ARG userfullname
 ARG userid
 ARG grpid
 
-LABEL build-date="2024-04-27" \
+LABEL build-date="2024-11-21" \
       name="dsenv" \
       description="Data Science Environment" \
       vcs-ref="" \
       vcs-url="" \
-      version="24.5.1"
+      version="24.11.21"
 
 ########################################################################
 ####  Define External Data Volumes
@@ -115,7 +115,7 @@ RUN R -e "install.packages('data.table')"
 
 ## install miniconda
 #RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
-ENV CONDA_INSTALLER Miniconda3-py39_24.3.0-0-Linux-x86_64.sh
+ENV CONDA_INSTALLER Miniconda3-py312_24.9.2-0-Linux-x86_64.sh
 RUN curl -fsSLO --compressed https://repo.anaconda.com/miniconda/${CONDA_INSTALLER}
 RUN bash ${CONDA_INSTALLER} -b
 ENV PATH /home/${username}/miniconda3/bin:$PATH
@@ -123,16 +123,10 @@ RUN bash /home/$username/miniconda3/bin/activate base
 
 
 # install jupyter lab
-RUN conda install python=3.9
-RUN conda install -c conda-forge nodejs==20.12.2
-RUN conda install -c conda-forge ipywidgets==8.1.2
-RUN conda install -c conda-forge jupyterlab==4.1.7
-RUN jupyter labextension install @jupyterlab/debugger
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
-
-RUN jupyter lab clean
-RUN jupyter lab build
-
+RUN conda install python=3.11
+#RUN conda install -c conda-forge nodejs==22.11.0
+RUN conda install -c conda-forge jupyterlab==4.3.1
+RUN conda install -c conda-forge ipywidgets
 
 # kernel support for R
 RUN echo "Installing R kernel"
@@ -151,9 +145,9 @@ RUN bash rustup.rs -y --no-modify-path
 ENV PATH /home/$username/.cargo/bin/:$PATH
 
 ### Alternative method:
-## RUN cargo install --force --git https://github.com/google/evcxr.git evcxr_jupyter
-## RUN rustup component add rust-src
-RUN cargo install evcxr_jupyter
+#RUN cargo install --force --git https://github.com/google/evcxr.git evcxr_jupyter
+#RUN rustup component add rust-src
+RUN cargo install --locked evcxr_jupyter
 RUN evcxr_jupyter --install
 
 ##
@@ -163,59 +157,33 @@ RUN pip install --no-cache-dir  --upgrade pip
 
 
 # system
-RUN pip install Cython==0.29.*
-RUN pip install click==8.1.3
-RUN pip install PyYAML==6.0
-RUN pip install psutil==5.9.4
-RUN pip install selenium==4.7.2
+RUN pip install Cython==3.0.9 click==8.1.7 PyYAML==6.0.2 psutil==6.1.0 selenium==4.26.1
 
 # jupyter extensions
-RUN pip install jupyter-resource-usage==0.7.1
-RUN pip install ipywidgets==8.0.4 tqdm==4.64.1
+RUN pip install jupyter-resource-usage==1.1.0 tqdm==4.67.0
 
 # data preparation / preprocessing
-RUN pip install pyspark==3.5.0
-RUN pip install pyarrow==10.0.1
-RUN pip install ydata-profiling==4.0.0
-RUN pip install polars==0.16.3
-RUN pip install numpy==1.23.5 pandas==1.5.3 xlrd==2.0.1
-RUN pip install geopandas==0.12.2 rasterio==1.3.4
-RUN pip install faker==15.3.*
+RUN pip install pyspark==3.5.3 pyarrow==18.0.0 ydata-profiling==4.12.0 polars==1.14.0
+RUN pip install pandas==2.2.3 xlrd==2.0.1
+RUN pip install geopandas==1.0.1 rasterio==1.4.2 faker==33.0.*
 
 # classic ml
-RUN pip install nltk==3.8
-RUN pip install scipy==1.9.3 
-RUN pip install scikit-learn==1.2.1
-RUN pip install category_encoders==2.6.0
-RUN pip install catboost==1.1.1
-RUN pip install lightgbm==3.3.2
-RUN pip install xgboost==1.7.3
+RUN pip install nltk==3.9.1 scipy==1.14.1 scikit-learn==1.5.2
+RUN pip install category_encoders==2.6.4 catboost==1.2.7  lightgbm==4.5.0 xgboost==2.1.2
 
 # neural networks / linalg
-RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install torchaudio==0.13.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip install tensorflow-gpu==2.11.0
-RUN pip install transformers==4.25.*
-RUN pip install spacy==3.5.*
-RUN pip install accelerate==0.16.*
-RUN pip install pytorch-lightning==1.9.1
-RUN pip install diffusers==0.12.1
+#RUN pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1
+RUN pip install tensorflow==2.18.0 autoawq==0.2.7.* transformers==4.46.3
+RUN pip install spacy==3.8.2 accelerate==1.1.1 pytorch-lightning==2.4.0 diffusers==0.31.0
 
-#visualisation
-RUN pip install bokeh==3.0.3
-RUN pip install seaborn==0.12.2
-RUN pip install matplotlib==3.6.2
-RUN pip install networkx==3.0.*
-
-# misc
-RUN pip install kaggle==1.5.12
-
+#visualisation & misc
+RUN pip install bokeh==3.6.1 seaborn==0.13.2 matplotlib==3.9.2 networkx==3.4.2 kaggle==1.6.17
 
 ## pre-init some libraries
 # nltk
-RUN echo "Install nltk models"
-RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
+RUN echo "Install nltk models"\
+  && python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
 # ## FLAIR
 # # RUN echo "Install Flair models"
 # # RUN python -c "from flair.embeddings import BertEmbeddings; BertEmbeddings('bert-base-cased')"
@@ -232,11 +200,9 @@ RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); 
 # # "import gensim.downloader as api;\
 # #  api.load('glove-twitter-25',  True);"
 
-RUN python -m spacy download en_core_web_sm
-RUN python -m spacy download ru_core_news_sm
-RUN python -m spacy download ru_core_news_lg
-
-
+RUN python -m spacy download en_core_web_sm\
+ && python -m spacy download ru_core_news_sm\
+ && python -m spacy download ru_core_news_lg
 
 ## Extra Dependencies / Experimentals
 RUN mkdir /home/$username/dependencies/
@@ -266,27 +232,30 @@ RUN git config --global user.email $usermail
 RUN git config --global user.name $userfullname
 
 USER root
-RUN curl -OL https://golang.org/dl/go1.19.4.linux-amd64.tar.gz
-RUN tar -C /usr/local -xvf go1.19.4.linux-amd64.tar.gz
 
-USER $username
-ENV PATH "$PATH:/usr/local/go/bin"
-ENV GO111MODULE "on"
-RUN go install github.com/gopherdata/gophernotes@v0.7.5
-RUN mkdir -p /home/$username/.local/share/jupyter/kernels/gophernotes
-RUN cd /home/$username/.local/share/jupyter/kernels/gophernotes && cp "$(go env GOPATH)"/pkg/mod/github.com/gopherdata/gophernotes@v0.7.5/kernel/*  "." && chmod +w ./kernel.json  && sed "s|gophernotes|$(go env GOPATH)/bin/gophernotes|" < kernel.json.in > kernel.json
-
-USER root
-
-RUN echo $username:$userpasswd | chpasswd
-RUN chown -R $username /home/$username/.ssh
-RUN chown -R $username /home/$username/.local
+RUN chown -R $username /home/$username/.ssh && chown -R $username /home/$username/.local
 
 ADD bin/entrypoint.sh /entrypoint.sh
-RUN sed -i s/%%username%%/$username/g /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-RUN chown $username /entrypoint.sh
+RUN sed -i s/%%username%%/$username/g /entrypoint.sh\
+  && chmod +x /entrypoint.sh\
+  && chown $username /entrypoint.sh
+RUN usermod -p $userpasswd $username
+
+RUN curl -OL https://go.dev/dl/go1.23.2.linux-amd64.tar.gz
+RUN tar -C /usr/local -xvf go1.23.2.linux-amd64.tar.gz
+ENV PATH "$PATH:/usr/local/go/bin"
+RUN go install github.com/janpfeifer/gonb@latest
+RUN go install golang.org/x/tools/cmd/goimports@latest
+RUN go install golang.org/x/tools/gopls@latest
 USER $username
+
+ENV PATH "$PATH:/usr/local/go/bin"
+
+
+#ENV GO111MODULE "on"
+#RUN go install github.com/gopherdata/gophernotes@v0.7.5
+#RUN mkdir -p /home/$username/.local/share/jupyter/kernels/gophernotes
+#RUN cd /home/$username/.local/share/jupyter/kernels/gophernotes && cp "$(go env GOPATH)"/pkg/mod/github.com/gopherdata/gophernotes@v0.7.5/kernel/*  "." && chmod +w ./kernel.json  && sed "s|gophernotes|$(go env GOPATH)/bin/gophernotes|" < kernel.json.in > kernel.json
 
 ########################################################################
 ##  Paths & Environment
@@ -306,7 +275,7 @@ ENV PYSPARK_DRIVER_PYTHON "python3.9"
 ENV PYSPARK_PYTHON "python3.9"
 # ENV HF_HOME "/shared/notebooks/db/dl_models"
 RUN echo "export PATH=$PATH" >> /home/$username/.bashrc
-
+RUN echo "export LD_LIBRARY_PATH=$CUDA_LIB_PATH:$LD_LIBRARY_PATH"
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
